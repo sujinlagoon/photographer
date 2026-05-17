@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Find Your Photos - {{ event.client_name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --bg: #0b0f1a;
+            --card-bg: rgba(20, 26, 42, 0.8);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            /* iOS fix */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            padding-top: max(1.5rem, env(safe-area-inset-top));
+            padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+            background:
+                radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(79, 70, 229, 0.1) 0%, transparent 50%),
+                var(--bg);
+            overflow-x: hidden;
+        }
+
+        html {
+            height: -webkit-fill-available;
+            /* iOS fix */
+        }
+
+        .search-card {
+            background: var(--card-bg);
+            padding: 3rem 2rem;
+            border-radius: 2.5rem;
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            position: relative;
+            z-index: 1;
+            animation: cardAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .logo-section {
+            margin-bottom: 2rem;
+        }
+
+        .logo-section img {
+            max-height: 70px;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(to bottom, #fff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        /* HTTPS Warning Banner */
+        .https-warning {
+            display: none;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            color: #fca5a5;
+            line-height: 1.5;
+        }
+
+        .https-warning.show {
+            display: block;
+        }
+
+        /* Scanner Design */
+        .scanner-container {
+            position: relative;
+            margin: 0 auto 2rem;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            padding: 10px;
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            box-shadow: 0 0 40px var(--primary-glow);
+            animation: pulse-glow 2s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            from {
+                box-shadow: 0 0 20px var(--primary-glow);
+            }
+
+            to {
+                box-shadow: 0 0 50px var(--primary-glow);
+            }
+        }
+
+        .scanner-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #video-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            /* Critical for iOS Safari */
+            -webkit-transform: scaleX(-1);
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+            box-shadow: 0 0 20px 4px var(--primary);
+            z-index: 10;
+            animation: scan-move 2.5s ease-in-out infinite;
+        }
+
+        @keyframes scan-move {
+
+            0%,
+            100% {
+                top: 10%;
+                opacity: 0.3;
+            }
+
+            50% {
+                top: 85%;
+                opacity: 1;
+            }
+        }
+
+        .scan-overlay {
+            position: absolute;
+            inset: 0;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* Placeholder icon when camera isn't active */
+        .camera-placeholder {
+            font-size: 5rem;
+            opacity: 0.3;
+        }
+
+        .status-badge {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 0 auto 1.5rem;
+            width: fit-content;
+        }
+
+        .status-badge.show {
+            display: inline-flex;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: status-pulse 1s infinite alternate;
+            flex-shrink: 0;
+        }
+
+        .status-dot.error {
+            background: var(--error);
+            animation: none;
+        }
+
+        .status-dot.success {
+            background: var(--success);
+            animation: none;
+        }
+
+        @keyframes status-pulse {
+            from {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 1.2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 1.2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            gap: 0.75rem;
+            box-shadow: 0 10px 20px -5px var(--primary-glow);
+            /* Prevent double-tap zoom on mobile */
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px var(--primary-glow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            filter: brightness(0.95);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            padding: 0.8rem;
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: none;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 15, 26, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .match-success {
+            color: var(--success);
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes bounceIn {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        /* In-app browser notice */
+        .inapp-notice {
+            display: none;
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.82rem;
+            color: #fde68a;
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        .inapp-notice.show {
+            display: block;
+        }
+
+        .inapp-notice strong {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 480px) {
+            .search-card {
+                padding: 2.5rem 1.5rem;
+                border-radius: 2rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .scanner-container {
+                width: 220px;
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="search-card">
+        <div class="logo-section">
+            {% if event.logo_url %}
+            <img src="{{ event.logo_url }}" alt="Logo">
+            {% endif %}
+            <h1>Face ID Scanner</h1>
+            <p class="subtitle">Look at the camera and we'll find your photos instantly.</p>
+        </div>
+
+        <!-- In-app browser warning (Instagram, Facebook, etc.) -->
+        <div class="inapp-notice" id="inapp-notice">
+            <strong>⚠️ Open in Browser for Camera Access</strong>
+            You're in an in-app browser (Instagram/Facebook/etc.) which blocks camera access.
+            Tap the <strong>⋯ menu → Open in Safari / Chrome</strong> to continue.
+        </div>
+
+        <!-- HTTPS warning -->
+        <div class="https-warning" id="https-warning">
+            <strong>🔒 HTTPS Required</strong><br>
+            Camera access requires a secure connection (HTTPS). Please open this page via <strong>https://</strong> or
+            contact the event organizer for the secure link.
+        </div>
+
+        <!-- Status badge -->
+        <div class="status-badge" id="status-badge">
+            <div class="status-dot" id="status-dot"></div>
+            <span id="status-text">Starting Camera...</span>
+        </div>
+
+        <!-- Setup / Start screen -->
+        <div id="setup-view">
+            <div class="scanner-container" style="margin-bottom: 2rem;">
+                <div class="scanner-inner">
+                    <div class="camera-placeholder">📷</div>
+                </div>
+            </div>
+            <button class="btn" id="start-btn" onclick="startCamera()">
+                <span>📷</span> Start Face Scan
+            </button>
+        </div>
+
+        <!-- Live scanner -->
+        <div class="scanner-container" id="scanner-view" style="display: none;">
+            <div class="scanner-inner">
+                <div class="scan-line" id="scan-line" style="display:none;"></div>
+                <div class="scan-overlay"></div>
+                <video id="video-feed" autoplay playsinline muted></video>
+                <canvas id="capture-canvas" style="display: none;"></canvas>
+            </div>
+        </div>
+
+        <!-- Manual upload fallback (always visible below scanner) -->
+        <div id="manual-fallback" style="display: none;">
+            <div class="divider">or</div>
+            <label for="selfie-input" class="btn btn-secondary" style="cursor: pointer; margin-top: 0;">
+                <span>📤</span> Upload a Selfie Instead
+            </label>
+            <input type="file" id="selfie-input" name="selfie" accept="image/*" capture="user" style="display: none;">
+        </div>
+    </div>
+
+    <!-- Match found overlay -->
+    <div class="loading-overlay" id="match-overlay">
+        <div class="match-success">✓</div>
+        <h2 style="font-weight: 700; margin-bottom: 0.5rem;">Match Found!</h2>
+        <p id="match-message" style="color: var(--text-muted);">Taking you to your photos...</p>
+    </div>
+
+    <script>
+        // ─── Elements ─────────────────────────────────────────────────────────
+        const video = document.getElementById('video-feed');
+        const canvas = document.getElementById('capture-canvas');
+        const statusBadge = document.getElementById('status-badge');
+        const statusText = document.getElementById('status-text');
+        const statusDot = document.getElementById('status-dot');
+        const scannerView = document.getElementById('scanner-view');
+        const setupView = document.getElementById('setup-view');
+        const scanLine = document.getElementById('scan-line');
+        const matchOverlay = document.getElementById('match-overlay');
+        const fallback = document.getElementById('manual-fallback');
+        const fileInput = document.getElementById('selfie-input');
+        const startBtn = document.getElementById('start-btn');
+
+        const eventId = {{ event.id }};
+        let isProcessing = false;
+        let scanInterval = null;
+        let stream = null;
+
+        // ─── Environment Checks ───────────────────────────────────────────────
+
+        /** Detect in-app browsers (Instagram, Facebook, TikTok, Twitter/X) */
+        function isInAppBrowser() {
+            const ua = navigator.userAgent || '';
+            return /FBAN|FBAV|Instagram|Twitter|Line\/|MicroMessenger|TikTok/i.test(ua);
+        }
+
+        /** True only on real HTTPS or localhost (which browsers treat as secure) */
+        function isSecureContext() {
+            return window.isSecureContext === true ||
+                location.protocol === 'https:' ||
+                location.hostname === 'localhost' ||
+                location.hostname === '127.0.0.1' ||
+                location.hostname.endsWith('.localhost');
+        }
+
+        /** Does the browser expose getUserMedia at all? */
+        function hasCameraAPI() {
+            return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+        }
+
+        // Run checks on load (before user taps anything)
+        (function runEnvironmentChecks() {
+            if (isInAppBrowser()) {
+                document.getElementById('inapp-notice').classList.add('show');
+                startBtn.disabled = true;
+            } else if (!isSecureContext()) {
+                document.getElementById('https-warning').classList.add('show');
+                startBtn.disabled = true;
+                fallback.style.display = 'block'; // offer upload as alternative
+            } else if (!hasCameraAPI()) {
+                // Secure context but old browser — show upload immediately
+                showStatus('Camera not supported', 'error');
+                fallback.style.display = 'block';
+                startBtn.disabled = true;
+            }
+        })();
+
+        // ─── Start Camera ─────────────────────────────────────────────────────
+        async function startCamera() {
+            // Guard: must be called from a real user gesture (it is — onclick)
+            startBtn.disabled = true;
+
+            // Move to scanner view immediately so user sees feedback
+            setupView.style.display = 'none';
+            scannerView.style.display = 'block';
+            showStatus('Requesting camera…', 'active');
+
+            try {
+                stream = await getCameraStream();
+            } catch (err) {
+                handleCameraError(err);
+                return;
+            }
+
+            video.srcObject = stream;
+
+            // iOS Safari needs the 'loadedmetadata' event — video.play() before
+            // that returns a rejected promise on some versions.
+            video.onloadedmetadata = async () => {
+                try {
+                    await video.play();
+                } catch (playErr) {
+                    // Autoplay blocked — extremely rare with muted + playsinline, but handle it
+                    console.warn('video.play() rejected:', playErr);
+                }
+                scanLine.style.display = 'block';
+                showStatus('Scanning faces…', 'active');
+                fallback.style.display = 'block'; // show upload option while scanning
+                startScanning();
+            };
+
+            // Fallback: if metadata never fires (some Android WebViews)
+            setTimeout(() => {
+                if (video.readyState >= 2 && !scanInterval) {
+                    video.play().catch(() => { });
+                    scanLine.style.display = 'block';
+                    showStatus('Scanning faces…', 'active');
+                    startScanning();
+                }
+            }, 3000);
+        }
+
+        /** Try ideal constraints, fall back to minimal if they fail */
+        async function getCameraStream() {
+            const constraints = [
+                // Ideal: front camera, high resolution
+                { video: { facingMode: 'user', width: { ideal: 1080 }, height: { ideal: 1080 } } },
+                // Fallback 1: front camera, any resolution
+                { video: { facingMode: 'user' } },
+                // Fallback 2: any camera (some Android devices)
+                { video: true },
+            ];
+
+            let lastError;
+            for (const c of constraints) {
+                try {
+                    return await navigator.mediaDevices.getUserMedia(c);
+                } catch (err) {
+                    lastError = err;
+                    // Only retry on OverconstrainedError; other errors won't change with looser constraints
+                    if (err.name !== 'OverconstrainedError') break;
+                }
+            }
+            throw lastError;
+        }
+
+        // ─── Error Handling ───────────────────────────────────────────────────
+        function handleCameraError(err) {
+            console.error('Camera error:', err.name, err.message);
+
+            scannerView.style.display = 'none';
+            setupView.style.display = 'block';
+            fallback.style.display = 'block';
+            startBtn.disabled = false;
+
+            const messages = {
+                NotAllowedError: '🚫 Camera permission denied. Please allow camera access in your browser settings and try again.',
+                PermissionDenied: '🚫 Camera permission denied. Please allow camera access in your browser settings and try again.',
+                NotFoundError: '📷 No camera found on this device.',
+                NotReadableError: '⚠️ Camera is in use by another app. Please close other apps and try again.',
+                OverconstrainedError: '⚠️ Camera constraints not supported. Trying a simpler mode — tap Start again.',
+                AbortError: '⚠️ Camera access was interrupted. Please try again.',
+                SecurityError: '🔒 Camera blocked: this page must be served over HTTPS.',
+            };
+
+            const msg = messages[err.name] || `⚠️ Camera error: ${err.message}`;
+            showStatus(msg, 'error');
+
+            // Extra: if denied, show browser-specific instructions
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDenied') {
+                showPermissionHelp();
+            }
+        }
+
+        function showPermissionHelp() {
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const isAndroid = /Android/i.test(navigator.userAgent);
+
+            let hint = '';
+            if (isIOS) {
+                hint = 'On iPhone/iPad: Settings → Safari → Camera → Allow.';
+            } else if (isAndroid) {
+                hint = 'On Android: tap the 🔒 lock icon in the address bar → Permissions → Camera → Allow.';
+            } else {
+                hint = 'Click the camera icon in your browser address bar and allow access.';
+            }
+
+            const el = document.createElement('p');
+            el.style.cssText = 'font-size:0.8rem;color:var(--text-muted);margin-top:0.75rem;line-height:1.5;';
+            el.textContent = hint;
+            fallback.prepend(el);
+        }
+
+        // ─── Scanning Loop ────────────────────────────────────────────────────
+        function startScanning() {
+            if (scanInterval) return;
+            scanInterval = setInterval(captureAndSearch, 2000);
+        }
+
+        async function captureAndSearch() {
+            if (isProcessing || video.readyState < 2) return;
+            isProcessing = true;
+
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 640;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+            showStatus('Analyzing…', 'active');
+
+            try {
+                const response = await fetch(`/api/v1/search-live/${eventId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageData }),
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const result = await response.json();
+
+                if (result.success && result.redirect_url) {
+                    clearInterval(scanInterval);
+                    stopCamera();
+                    showMatch(result.redirect_url);
+                } else {
+                    showStatus('Scanning faces…', 'active');
+                    isProcessing = false;
+                }
+            } catch (err) {
+                console.error('Search error:', err);
+                showStatus('Scanning faces…', 'active'); // keep scanning silently
+                isProcessing = false;
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(t => t.stop());
+                stream = null;
+            }
+        }
+
+        function showMatch(redirectUrl) {
+            matchOverlay.classList.add('show');
+            setTimeout(() => {
+                window.location.href = redirectUrl || `/gallery-view/${eventId}?view=secure`;
+            }, 1500);
+        }
+
+        // ─── Status Helper ────────────────────────────────────────────────────
+        function showStatus(msg, type = 'active') {
+            statusBadge.classList.add('show');
+            statusText.textContent = msg;
+            statusDot.className = 'status-dot ' + (type !== 'active' ? type : '');
+        }
+
+        // ─── Manual Upload Fallback ───────────────────────────────────────────
+        fileInput.addEventListener('change', () => {
+            if (!fileInput.files || !fileInput.files[0]) return;
+
+            const formData = new FormData();
+            formData.append('selfie', fileInput.files[0]);
+
+            showStatus('Uploading photo…', 'active');
+
+            fetch(`/search/${eventId}`, {
+                method: 'POST',
+                body: formData,
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error('Upload failed');
+                    return res.json();
+                })
+                .then(result => {
+                    if (result.success && result.matched_ids && result.matched_ids.length > 0) {
+                        showMatch(result.matched_ids);
+                    } else {
+                        showStatus('No match found. Try another photo.', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Upload error:', err);
+                    showStatus('Upload failed. Please try again.', 'error');
+                });
+        });
+
+        // ─── Cleanup on page hide (iOS background) ────────────────────────────
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && stream) {
+                clearInterval(scanInterval);
+                scanInterval = null;
+                isProcessing = false;
+            } else if (!document.hidden && stream && !scanInterval) {
+                startScanning();
+            }
+        });
+    </script>
+</body>
+
+</html>

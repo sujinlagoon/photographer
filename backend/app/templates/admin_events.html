@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Photo Cloud</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            background: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 100% 100%, rgba(192, 132, 252, 0.08) 0%, transparent 50%);
+            padding-bottom: 4rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-greeting h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .user-greeting p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+            filter: brightness(1.1);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 2rem;
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .event-card {
+            background: var(--card-bg);
+            border-radius: 2rem;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        .event-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .badge {
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-id { background: rgba(255, 255, 255, 0.1); color: var(--text-muted); }
+        .badge-mode { background: rgba(99, 102, 241, 0.15); color: var(--primary-light); }
+        .badge-wifi { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+
+        .event-info h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .event-info p {
+            color: var(--text-muted);
+            font-size: 0.9375rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-box {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1rem;
+            border-radius: 1.25rem;
+            font-size: 0.8125rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 1rem;
+        }
+
+        .info-box span {
+            display: block;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.05em;
+        }
+
+        .info-box code {
+            color: var(--primary-light);
+            word-break: break-all;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .qr-container {
+            background: white;
+            padding: 1.25rem;
+            border-radius: 1.5rem;
+            width: 160px;
+            height: 160px;
+            margin: 1rem auto 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .qr-container img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .event-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: auto;
+        }
+
+        .event-actions > * {
+            width: 100%;
+        }
+
+        .btn-full {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+            .nav-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .event-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="user-greeting">
+                <div class="logo-text">📸 Photo Cloud</div>
+                <p>Welcome back, <span style="color: var(--text); font-weight: 600;">{{ session.get('username', 'User') }}</span></p>
+            </div>
+            <div class="nav-actions">
+                {% if user_role == 'admin' %}
+                <a href="/admin/events/create" class="btn btn-primary">+ New Event</a>
+                {% endif %}
+                <a href="/admin/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </header>
+
+        <div class="event-grid">
+            {% for event in events %}
+            <div class="event-card">
+                <div class="event-header">
+                    <span class="badge badge-id">#{{ event.id }}</span>
+                    <span class="badge {{ 'badge-wifi' if event.transfer_method == 'wifi' else 'badge-mode' }}">
+                        {{ '📡 Wi-Fi' if event.transfer_method == 'wifi' else '🔌 Wired' }}
+                    </span>
+                </div>
+                
+                <div class="event-info">
+                    <h3>{{ event.client_name }}</h3>
+                    <p>{{ event.event_name }}</p>
+                    
+                    {% if event.transfer_method == 'wired' %}
+                    <div class="info-box">
+                        <span>Local Watch Folder</span>
+                        <code>{{ event.folder_path }}</code>
+                    </div>
+                    {% else %}
+                    <div class="info-box">
+                        <span>FTP Pass</span>
+                        <code>{{ event.wifi_password or 'photo123' }}</code>
+                    </div>
+                    {% endif %}
+
+                    {% if user_role == 'admin' and event.owner %}
+                    <div class="info-box" style="background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.2);">
+                        <span>Client Login</span>
+                        <code style="color: var(--text);">{{ event.owner.username }}</code>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="qr-container">
+                    <img src="/static/qr/event_{{ event.id }}.png" alt="QR Code">
+                </div>
+
+                <div class="event-actions">
+                    <a href="/gallery-view/{{ event.id }}" target="_blank" class="btn btn-outline">View</a>
+                    <a href="/static/qr/event_{{ event.id }}.png" download class="btn btn-outline">QR</a>
+                    
+                    {% if user_role == 'admin' %}
+                    <a href="/admin/events/edit/{{ event.id }}" class="btn btn-outline">Edit</a>
+                    <form action="/admin/events/delete/{{ event.id }}" method="POST" style="display: contents;" onsubmit="return confirm('⚠️ Delete this event?');">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if not events %}
+        <div style="text-align: center; padding: 10rem 0; opacity: 0.5;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🍃</div>
+            <p>No events found. Time to capture some memories!</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

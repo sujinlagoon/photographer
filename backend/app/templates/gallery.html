@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{{ event.client_name }} - Moments</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --bg: #0b0f1a;
+            --surface: rgba(20, 26, 42, 0.7);
+            --surface-hover: rgba(30, 41, 59, 0.8);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --error: #ef4444;
+            --header-height: 80px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            background: 
+                radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(79, 70, 229, 0.05) 0%, transparent 40%),
+                var(--bg);
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        /* --- Header & Navigation --- */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: rgba(11, 15, 26, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .nav-logo img {
+            height: 40px;
+            width: auto;
+            border-radius: 8px;
+        }
+
+        .nav-logo span {
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* --- Content Layout --- */
+        .main-content {
+            padding-top: calc(var(--header-height) + 2rem);
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-bottom: 5rem;
+        }
+
+        /* --- Search Header Section --- */
+        .search-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 0 1.5rem;
+            animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .search-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .search-badge.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to bottom, #fff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* --- Buttons --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem 1.5rem;
+            border-radius: 1rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+            gap: 0.6rem;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 10px 20px -5px var(--primary-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow: 0 15px 30px -5px var(--primary-glow);
+        }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* --- Gallery Grid --- */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 0 1.5rem;
+        }
+
+        .photo-card {
+            position: relative;
+            border-radius: 1rem;
+            overflow: hidden;
+            aspect-ratio: 1/1; /* 1/1 looks better for denser grids */
+            cursor: pointer;
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: cardReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes cardReveal {
+            from { opacity: 0; transform: translateY(20px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .photo-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            border-color: rgba(99, 102, 241, 0.4);
+            z-index: 10;
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .photo-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .photo-card .overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
+            opacity: 0;
+            transition: all 0.4s;
+            display: flex;
+            align-items: flex-end;
+            padding: 1rem;
+        }
+
+        .photo-card:hover .overlay {
+            opacity: 1;
+        }
+
+        .card-info {
+            transform: translateY(10px);
+            transition: all 0.4s 0.1s;
+        }
+
+        .photo-card:hover .card-info {
+            transform: translateY(0);
+        }
+
+        /* --- Lightbox / Modal --- */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(7, 10, 18, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 95vw;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            transform: scale(0.9);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-img-container {
+            position: relative;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal img {
+            max-width: 100%;
+            max-height: 75vh;
+            display: block;
+        }
+
+        .modal-close {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 1.5rem;
+            transition: 0.3s;
+            z-index: 2100;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-close:hover {
+            background: var(--error);
+            transform: rotate(90deg);
+        }
+
+        /* --- Live Pulse --- */
+        .live-indicator {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(239, 68, 68, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 0.6rem 1.2rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            z-index: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #ef4444;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.6); opacity: 0.4; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            .navbar { padding: 0 1.25rem; height: 70px; }
+            .header-height { --header-height: 70px; }
+            .page-title { font-size: 2rem; }
+            .gallery { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 0.75rem; 
+                padding: 0 0.75rem; 
+            }
+            .photo-card { border-radius: 0.75rem; }
+        }
+
+        @media (max-width: 480px) {
+            .nav-logo span { display: none; }
+            .gallery { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 0.5rem; 
+                padding: 0 0.5rem; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/gallery-view/{{ event.id }}" class="nav-logo">
+            {% if event.logo_url %}
+            <img src="{{ event.logo_url }}" alt="Logo">
+            {% endif %}
+            <span>{{ event.client_name }}</span>
+        </a>
+        <div class="nav-actions">
+            {% if event.face_scan_enabled %}
+                {# Face Scan is enabled: Guests MUST search. Only show search-related actions. #}
+                <a href="/search/{{ event.id }}" class="btn btn-primary">
+                    <span>🔍</span> <span class="hide-mobile">Search Again</span>
+                </a>
+            {% else %}
+                {# Face Scan is disabled: Show full gallery only. No search button. #}
+                <div class="search-badge" style="margin: 0; padding: 0.5rem 1rem;">
+                    <span>🖼️</span> Public Gallery
+                </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="search-header">
+            {% if is_search %}
+                {% if photos %}
+                <div class="search-badge success">
+                    <span>✨</span> Found {{ photos|length }} matching moments
+                </div>
+                <h1 class="page-title">Your Memories</h1>
+                <p class="page-subtitle">Personalized gallery for {{ event.client_name }}</p>
+                {% else %}
+                <div class="search-badge" style="color: var(--error); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2);">
+                    <span>❌</span> No matches found
+                </div>
+                <h1 class="page-title">Try Again</h1>
+                <p class="page-subtitle">We couldn't find your face. Try a clearer selfie!</p>
+                <a href="/search/{{ event.id }}" class="btn btn-primary">🔄 Retake Selfie</a>
+                {% endif %}
+            {% else %}
+                <div class="search-badge">
+                    <span>📸</span> Live Event Gallery
+                </div>
+                <h1 class="page-title">{{ event.event_name }}</h1>
+                <p class="page-subtitle">Experience the moments of {{ event.client_name }}</p>
+            {% endif %}
+        </header>
+
+        {% if photos %}
+        <div class="gallery">
+            {% for photo in photos %}
+            <div class="photo-card" style="animation-delay: {{ loop.index0 * 0.1 }}s" onclick="openImage('{{ photo.image_url }}')">
+                <img src="{{ photo.image_url }}" loading="lazy" alt="Moment">
+                <div class="overlay">
+                    <div class="card-info">
+                        <div style="font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem;">Memory Captured</div>
+                        <div style="font-size: 0.8rem; opacity: 0.7;">Click to expand</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            {% if not is_search %}
+            <div style="text-align: center; padding: 5rem 2rem; opacity: 0.5;">
+                <div style="font-size: 4rem; margin-bottom: 1.5rem;">📸</div>
+                <h3>The gallery is waiting for its first photo.</h3>
+                <p>Moments will appear here automatically as they are captured!</p>
+            </div>
+            {% endif %}
+        {% endif %}
+    </main>
+
+    {% if not is_search %}
+    <div class="live-indicator">
+        <div class="pulse-dot"></div>
+        Live Updating
+    </div>
+    {% endif %}
+
+    <!-- Lightbox Modal -->
+    <div class="modal" id="imageModal" onclick="closeImage()">
+        <div class="modal-close" onclick="closeImage()">×</div>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-img-container">
+                <img id="modalImage" src="" alt="Moment Full View">
+            </div>
+            <div style="display: flex; gap: 1rem; width: 100%; justify-content: center;">
+                <a id="downloadBtn" href="" download class="btn btn-primary" style="padding: 1rem 2rem;">
+                    <span>⬇️</span> Download High Res
+                </a>
+                <button class="btn btn-ghost" onclick="closeImage()" style="padding: 1rem 2rem;">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Live Refresh Logic ---
+        {% if not is_search %}
+        let refreshTimer = setInterval(() => {
+            fetch(window.location.href)
+                .then(res => res.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newGallery = doc.querySelector('.gallery');
+                    const currentGallery = document.querySelector('.gallery');
+                    
+                    if (newGallery && currentGallery && newGallery.innerHTML !== currentGallery.innerHTML) {
+                        currentGallery.innerHTML = newGallery.innerHTML;
+                        console.log('✨ Gallery refreshed with new moments');
+                    }
+                });
+        }, 15000);
+        {% endif %}
+
+        // --- Lightbox Logic ---
+        function openImage(url) {
+            const modal = document.getElementById("imageModal");
+            const modalImg = document.getElementById("modalImage");
+            const downloadBtn = document.getElementById("downloadBtn");
+            
+            modalImg.src = url;
+            downloadBtn.href = url;
+            modal.style.display = "flex";
+            
+            // Trigger animation
+            setTimeout(() => modal.classList.add('show'), 10);
+            
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeImage() {
+            const modal = document.getElementById("imageModal");
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = "none";
+                document.body.style.overflow = "auto";
+            }, 300);
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeImage();
+        });
+    </script>
+</body>
+</html>
+ </script>
+</body>
+</html>

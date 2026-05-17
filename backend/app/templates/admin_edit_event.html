@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Event - Photo Cloud</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.1), transparent),
+                        radial-gradient(circle at bottom right, rgba(192, 132, 252, 0.1), transparent);
+        }
+
+        .form-card {
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 2.5rem;
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            background: linear-gradient(to right, #fff, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.25rem;
+            color: var(--text);
+            outline: none;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 3rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Switch Style */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary); }
+        input:focus + .slider { box-shadow: 0 0 1px var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        @media (max-width: 600px) {
+            .form-card { padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-card">
+        <h1>Edit Event</h1>
+        
+        <form action="/admin/events/edit/{{ event.id }}" method="POST" enctype="multipart/form-data">
+
+            <div class="form-group">
+                <label for="client_name">Client Name</label>
+                <input type="text" id="client_name" name="client_name" value="{{ event.client_name }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="event_name">Event Description</label>
+                <input type="text" id="event_name" name="event_name" value="{{ event.event_name }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="logo">Update Logo</label>
+                {% if event.logo_url %}
+                <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 1rem; text-align: center;">
+                    <img src="{{ event.logo_url }}" alt="Current Logo" style="max-height: 80px; border-radius: 0.5rem;">
+                </div>
+                {% endif %}
+                <input type="file" id="logo" name="logo" accept="image/*" style="padding: 0.6rem;">
+                <p class="hint">Upload a new logo to replace the current one.</p>
+            </div>
+
+
+            <div class="form-group">
+                <label for="folder_path">Local Watch Folder Path</label>
+                <input type="text" id="folder_path" name="folder_path" value="{{ event.folder_path or '' }}" placeholder="C:/Photos/Event">
+            </div>
+
+            <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.15); border-radius: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <h3 style="font-size: 1rem; color: #fff; margin-bottom: 0.25rem;">Face ID Scan</h3>
+                    <p class="hint" style="margin: 0;">Force users to scan their face before viewing photos.</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" name="face_scan_enabled" {% if event.face_scan_enabled %}checked{% endif %}>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            {% if event.owner %}
+            <div style="margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--primary-light);">Update Credentials</h3>
+                <div class="form-group">
+                    <label for="client_username">Username</label>
+                    <input type="text" id="client_username" name="client_username" value="{{ event.owner.username }}">
+                </div>
+                <div class="form-group">
+                    <label for="client_password">New Password (leave blank to keep current)</label>
+                    <input type="password" id="client_password" name="client_password" placeholder="••••••••">
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="btn-group">
+                <a href="/admin/events" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
